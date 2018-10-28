@@ -1,0 +1,27 @@
+// SublimeLinter Settings - User
+{
+  "debug": true,
+  "linters": {
+      "eslint": {
+          "@disable": false,
+          "args": [],
+          "excludes": []
+      },
+      "jsxhint": {
+          "@disable": false,
+          "args": [],
+          "excludes": []
+      }
+  },
+  "paths": {
+      "linux": [
+        "/home/user/n/bin/node"
+      ],
+      "osx": [
+        "/home/user/n/bin/node"
+      ],
+      "windows": [
+        "/home/user/n/bin/node"
+      ]
+  }
+}
