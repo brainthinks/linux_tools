@@ -1,0 +1,20 @@
+{
+    "editor.tabSize": 2,
+    "files.insertFinalNewline": true,
+    "files.trimTrailingWhitespace": true,
+    "typescript.npm": "/home/user/apps/n/bin/node",
+    "editor.parameterHints": false,
+    "window.zoomLevel": 0,
+    "editor.fontSize": 14,
+    "editor.scrollBeyondLastLine": true,
+    "editor.formatOnPaste": true,
+    "editor.multiCursorModifier": "ctrlCmd",
+    "editor.snippetSuggestions": "top",
+    "workbench.colorTheme": "Horizon",
+    "workbench.editor.closeEmptyGroups": false,
+    "editor.renderWhitespace": "all",
+    "editor.renderControlCharacters": false,
+    "javascript.updateImportsOnFileMove.enabled": "never",
+    "explorer.confirmDragAndDrop": false,
+    "files.maxMemoryForLargeFilesMB": 8192
+}
