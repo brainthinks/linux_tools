@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 
-BUILD_DIR="./build"
+# I assume that you run this script from the directory in which it exists
+
+ROOT_DIR="$(pwd)"
+BUILD_DIR="$ROOT_DIR/src/build"
+FFMPEG_TAG="n4.0.2"
 
 function installDependencies () {
   sudo apt-get update
@@ -9,7 +13,7 @@ function installDependencies () {
     automake \
     build-essential \
     cmake \
-    git-core \
+    git \
     libass-dev \
     libfreetype6-dev \
     libsdl2-dev \
@@ -24,7 +28,6 @@ function installDependencies () {
     texinfo \
     wget \
     zlib1g-dev \
-    x11grab \
     yasm \
     libx264-dev \
     libx265-dev \
@@ -35,111 +38,45 @@ function installDependencies () {
     libopus-dev
 }
 
+# @todo - check for the existence of `/usr/include/blackmagic_decklink_sdk`
+function compileFfmpeg () {
+  cd ~/ffmpeg_sources
+  wget -O ffmpeg-snapshot.tar.bz2 https://ffmpeg.org/releases/ffmpeg-snapshot.tar.bz2
+  tar xjvf ffmpeg-snapshot.tar.bz2
+  cd ffmpeg
+  PATH="$HOME/bin:$PATH" PKG_CONFIG_PATH="$HOME/ffmpeg_build/lib/pkgconfig" ./configure \
+    --prefix="$HOME/ffmpeg_build" \
+    --pkg-config-flags="--static" \
+    --extra-cflags="-I$HOME/ffmpeg_build/include -I/usr/include/blackmagic_decklink_sdk" \
+    --extra-ldflags="-L$HOME/ffmpeg_build/lib" \
+    --extra-libs="-lpthread -lm" \
+    --bindir="$HOME/bin" \
+    --enable-gpl \
+    --enable-libass \
+    --enable-libfdk-aac \
+    --enable-libfreetype \
+    --enable-libmp3lame \
+    --enable-libopus \
+    --enable-libvorbis \
+    --enable-libvpx \
+    --enable-libx264 \
+    --enable-libx265 \
+    --enable-nonfree \
+    --enable-decklink
+
+  PATH="$HOME/bin:$PATH" make -j20
+  make -j20 install
+  hash -r
+}
+
 function installManDocs () {
   echo "MANPATH_MAP $BUILD_DIR/bin $BUILD_DIR/ffmpeg_build/share/man" >> ~/.manpath
 }
 
-function compileFfmpeg () {
-  local recommendedFlags=(\
-    '--prefix="$BUILD_DIR/ffmpeg_build"' \
-    '--pkg-config-flags="--static"' \
-    '--extra-cflags="-I$BUILD_DIR/ffmpeg_build/include"' \
-    '--extra-ldflags="-L$BUILD_DIR/ffmpeg_build/lib"' \
-    '--extra-libs="-lpthread -lm"' \
-    '--bindir="$BUILD_DIR/bin"' \
-    '--enable-gpl' \
-    '--enable-libaom' \
-    '--enable-libass' \
-    '--enable-libfdk-aac' \
-    '--enable-libfreetype' \
-    '--enable-libmp3lame' \
-    '--enable-libopus' \
-    '--enable-libvorbis' \
-    '--enable-libvpx' \
-    '--enable-libx264' \
-    '--enable-libx265' \
-    '--enable-nonfree' \
-  )
-
-  local defaultUbuntuCompileFlags=(\
-    '--toolchain=hardened' \
-    '--enable-gpl' \
-    '--disable-stripping' \
-    '--enable-avresample' \
-    '--enable-avisynth' \
-    '--enable-gnutls' \
-    '--enable-ladspa' \
-    '--enable-libass' \
-    '--enable-libbluray' \
-    '--enable-libbs2b' \
-    '--enable-libcaca' \
-    '--enable-libcdio' \
-    '--enable-libflite' \
-    '--enable-libfontconfig' \
-    '--enable-libfreetype' \
-    '--enable-libfribidi' \
-    '--enable-libgme' \
-    '--enable-libgsm' \
-    '--enable-libmp3lame' \
-    '--enable-libmysofa' \
-    '--enable-libopenjpeg' \
-    '--enable-libopenmpt' \
-    '--enable-libopus' \
-    '--enable-libpulse' \
-    '--enable-librubberband' \
-    '--enable-librsvg' \
-    '--enable-libshine' \
-    '--enable-libsnappy' \
-    '--enable-libsoxr' \
-    '--enable-libspeex' \
-    '--enable-libssh' \
-    '--enable-libtheora' \
-    '--enable-libtwolame' \
-    '--enable-libvorbis' \
-    '--enable-libvpx' \
-    '--enable-libwavpack' \
-    '--enable-libwebp' \
-    '--enable-libx265' \
-    '--enable-libxml2' \
-    '--enable-libxvid' \
-    '--enable-libzmq' \
-    '--enable-libzvbi' \
-    '--enable-omx' \
-    '--enable-openal' \
-    '--enable-opengl' \
-    '--enable-sdl2' \
-    '--enable-libdc1394' \
-    '--enable-libdrm' \
-    '--enable-libiec61883' \
-    '--enable-chromaprint' \
-    '--enable-frei0r' \
-    '--enable-libopencv' \
-    '--enable-libx264' \
-    '--enable-shared' \
-  )
-
-  local blackmagicFlags=(\
-    '--enable-nonfree' \
-    '--enable-decklink' \
-  )
-
-  echo "${defaultUbuntuCompileFlags[@]}"
-
-  PATH="$BUILD_DIR/bin:$PATH" \
-  PKG_CONFIG_PATH="$BUILD_DIR/ffmpeg_build/lib/pkgconfig" \
-    ./configure \
-    "${recommendedFlags[@]}" \
-    "${defaultUbuntuCompileFlags[@]}" \
-    "${blackmagicFlags[@]}"
-
-  PATH="$BUILD_DIR/bin:$PATH" make
-
-  # make install
-
-  # hash -r
-}
-
+# installDependencies
 compileFfmpeg
+# installManDocs
 
 echo "Next steps:"
 echo "Ensure the NVIDIA proprietary driver is in use."
+echo "Ensure the NVIDIA triple buffering is enabled."
