@@ -3,7 +3,7 @@
     "files.insertFinalNewline": true,
     "files.trimTrailingWhitespace": true,
     "typescript.npm": "/home/user/apps/n/bin/node",
-    "editor.parameterHints": false,
+    "editor.parameterHints.enabled": false,
     "window.zoomLevel": 0,
     "editor.fontSize": 14,
     "editor.scrollBeyondLastLine": true,
