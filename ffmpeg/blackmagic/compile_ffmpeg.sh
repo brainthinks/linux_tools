@@ -73,7 +73,7 @@ function installManDocs () {
   echo "MANPATH_MAP $BUILD_DIR/bin $BUILD_DIR/ffmpeg_build/share/man" >> ~/.manpath
 }
 
-# installDependencies
+installDependencies
 compileFfmpeg
 # installManDocs
 
