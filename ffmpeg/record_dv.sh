@@ -11,6 +11,7 @@ FILE_NAME="$(date +%F-%s)"
 
 SINGLE_SEGMENT=$FALSE
 SPLIT=$FALSE
+NO_REWIND=$FALSE
 
 while :
 do
@@ -21,6 +22,10 @@ do
       ;;
     --split)
       SPLIT=$TRUE
+      shift
+      ;;
+    --no-rewind)
+      NO_REWIND=$TRUE
       shift
       ;;
     --) # End of all options
@@ -37,6 +42,8 @@ do
   esac
 done
 
+FILE_NAME="${FILE_NAME}_$1"
+
 dps "About to record DV..."
 
 if [[ "$UID" -ne 0 ]]; then
@@ -44,19 +51,31 @@ if [[ "$UID" -ne 0 ]]; then
   exit 1
 fi
 
+# @todo - check for the existence of destination!!!!
+
 dps "Ensuring destination exists..."
 mkdir -p "$DESTINATION/$FILE_NAME"
-ec "Destination exists" "Failed to create destination dir"
+ec "Created or confirmed $DESTINATION/$FILE_NAME" "Failed to create destination dir"
 
 if [[ $SINGLE_SEGMENT = $TRUE ]]; then
   dps "Rewinding the tape, then recording single segment..."
   # Rewind the tape, then record the entire tape as a single file
-  dvgrab \
-    -format raw \
-    -rewind \
-    -t \
-    -s 0 \
-    "$DESTINATION/$FILE_NAME/single_segment_"
+
+  if [[ $NO_REWIND = $TRUE ]]; then
+    dvgrab \
+      -format raw \
+      -t \
+      -s 0 \
+      "$DESTINATION/$FILE_NAME/single_segment_"
+  else
+    dvgrab \
+      -format raw \
+      -rewind \
+      -t \
+      -s 0 \
+      "$DESTINATION/$FILE_NAME/single_segment_"
+  fi
+
   ec "Finished recording single segment" "Failed to record single segment!"
 fi
 
@@ -64,13 +83,24 @@ if [[ $SPLIT = $TRUE ]]; then
   dps "Rewinding the tape, then recording split segments..."
   # Rewind the tape, then record the entire tape, allowing dvgrab
   # to split the video into files based on breaks in the timecode
-  dvgrab \
-    -format raw \
-    -rewind \
-    -a \
-    -t \
-    -s 0 \
-    "$DESTINATION/$FILE_NAME/segment_"
+  
+  if [[ $NO_REWIND = $TRUE ]]; then
+    dvgrab \
+      -format raw \
+      -a \
+      -t \
+      -s 0 \
+      "$DESTINATION/$FILE_NAME/segment_"
+  else
+    dvgrab \
+      -format raw \
+      -rewind \
+      -a \
+      -t \
+      -s 0 \
+      "$DESTINATION/$FILE_NAME/segment_"
+  fi
+
   ec "Finished recording split segments" "Failed to record split segments!"
 fi
 
