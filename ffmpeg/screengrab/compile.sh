@@ -83,6 +83,3 @@ PKG_CONFIG_PATH="$DESTINATION/ffmpeg_build/lib/pkgconfig" ./configure \
 make -j 10
 make install
 hash -r
-
-echo "$DESTINATION/bin/ffmpeg -codecs | grep -i cuvid"
-echo "$DESTINATION/bin/ffmpeg -y -hwaccel cuvid -c:v h264_cuvid -vsync 0 -f x11grab -i \"0.0+1920,0\" -vf scale_npp=1920:1072 -vcodec h264_nvenc output0.264 -vf scale_npp=1280:720 -vcodec h264_nvenc output1.264"

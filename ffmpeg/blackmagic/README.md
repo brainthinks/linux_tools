@@ -9,3 +9,7 @@ I think you have to register.  Once you download that, extract it.  The folder o
 1. `sudo cp -R ./Blackmagic\ DeckLink\ SDK\ 10.11.4/Linux/include/* "/usr/include/blackmagic_decklink_sdk/"`
 1. `./compile_ffmpeg.sh`
 
+Next, you will need to install the Blackmagic Drivers (thankfully, ffmpeg will output an error telling you that the drivers are missing).  Again, go to the support website to get the linux drivers for the capture and playback card.  The drivers are located in:
+
+`/home/user/Downloads/Blackmagic_Desktop_Video_Linux_10.11.2/deb/x86_64/desktopvideo_10.11.2a3_amd64.deb`
+
