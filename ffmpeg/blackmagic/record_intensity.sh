@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 DESTINATION="/media/user/big_ass_01/intensity_capture"
-FILE_NAME="$(date +%F-%s).mkv"
+FILE_NAME="$(date +%F-%s)_$1.mkv"
 
 echo "Press q to quit recording..."
 
