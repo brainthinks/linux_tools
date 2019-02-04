@@ -1,65 +1,25 @@
-# FFMPEG with Nvidia NVENC hardware acceleration
+# Screengrabbing with FFMPEG
 
-Note that I am using the following, and YMMV:
-* Linux Mint 19.1
-* Nvidia drivers `410.48-ubuntu1`
-* Nvidia Video Codec SDK `8.2.16`
-* cuda 10 - `cuda-repo-ubuntu1804-10-0-local-10.0.130-410.48_1.0-1_amd64`
-* latest ffmpeg - `N-92989-g3242160`
-* latest ffnvcodec
+I have had trouble doing screen captures in the past, whether of me doing stuff on my desktop, playing Doom, playing League of Legends, or anything else I feel like recording.  Typically, the recording shows lines, seemingly randomly, that are of my desktop background.  I have refered to this as "tearing", but I'm not sure that that is the technically accurate term.  It seems like there are portions of the video where certain strips show my desktop background rather than what is actually visible to me on the computer screen.
 
+I have recently wanted to be able to demonstrate some bugs in some software that I use, as well as record some tutorials for myself and others, and I have not come across what I think is a comprehensive, modern, and correct way to do screen capture on Linux.  I made a few videos in 2017 showing how I was doing it then, but I was never totally satisfied with the outcome - I got everything I wanted except for the fix to the screen tear.  It turns out that all I needed to do was enable triple buffering.  I was made aware of this by a generous comment on one of my youtube videos.
 
-## Preparation
+With the instructions from the videos I made in 2017 (linked below) and the knowledge I gained between then and now, from youtube comments and elsewhere, I wanted to put together a tutorial for doing proper and adequate screen capturing in the latest version of Mint/Ubuntu.
 
-1. Watch my video where I demonstrate the steps in this guide
-1. Be aware of the resource links at the bottom of this readme.  If you get stuck, refer to those, as those are the resources I used to come up with this guide
-1. Ensure you have the latest nvidia proprietary drivers installed
-    1. use `Driver Manager` to enable the proprietary nvidia drivers
-    1. use `Update Manager` to ensure you have the latest drivers and nvidia tools
+With these instructions and scripts, I can record my screen without tearing or compression/codec artifacts, with a track of my voice, the computer audio output, and a mix of the two.  This allows me to demonstrate something on the computer and voice over it if I want to.  After capturing the initial file (which is HUGE - you will need at least 100gb of hard drive space!), I can then convert the video to something smaller and more manageable, which I will then typically upload to youtube.
 
-
-## Install cuda toolkit
-
-1. [https://developer.nvidia.com/cuda-downloads](https://developer.nvidia.com/cuda-downloads)
-1. Choose the following download options:
-    1. Linux
-    1. x86_64
-    1. Ubuntu
-    1. 18.04
-    1. deb (local)
-1. Download the deb file
-1. Install the `.deb` file that you download
-1. All that deb file does is give you access to the cuda installation packages - you still have to install them
-1. Run the additional installation commands from the website, e.g.:
-    1. `sudo apt-key add /var/cuda-repo-<version>/7fa2af80.pub`
-    1. `sudo apt update`
-    1. `sudo apt install cuda`
-
-
-## Install Nvidia Video Codec SDK
-
-1. [https://developer.nvidia.com/nvidia-video-codec-sdk](https://developer.nvidia.com/nvidia-video-codec-sdk)
-1. Sign up for an account
-1. Download the SDK
-1. Extract that SDK file, and make a note of where that is (I just kept mine in my Downloads folder), because you'll need it later
-
-
-## Restart Your Computer
-
-Seriously, restart your computer now.
-
-
-## Confirm Cuda works
-
-Run `nvidia-smi`.  Does it work, or does it display an error?  If it works and shows you a nicely formatted table, then you may continue to the next step.  If an error is printed, meaning you don't see a table with some driver info, try restarting your machine.  If that doesn't work, you're on your own.
-
-
-## Run the `compile.sh` script
-
-This script will install the rest of the necessary dependencies and will actually build ffmpeg for you in the `build` directory.
+I hope you find this useful in some way.
 
 
 ## Configurations
+
+### System
+
+Note that I am using the following, and YMMV:
+* Linux Mint 19
+* Nvidia GeForce GTX 1080
+* Nvidia drivers `410.48-ubuntu1`
+* stock ubuntu ffmpeg
 
 ### Nvidia settings
 
@@ -67,59 +27,68 @@ These settings will reduce / eliminate screen tearing during screen capture.
 
 1. Load "nvidia-settings"
 1. Choose "X Server Display Configuration" from the left nav
-1. Click the "Advanced" button at the bottom
-1. Check the boxes for "Force Composition Pipeline" and "Force Full Composition Pipeline"
-1. Click "Apply"
+1. Click "Save to X Configuration File"
+1. Save the file to `/etc/X11/xorg.conf`
+1. Quit the Nvidia Settings application
+1. `sudo nano /etc/X11/xorg.conf`
+1. Add the following line to `Section "Screen"`
+    * `Option         "TripleBuffer" "On"`
+1. Restart your computer
+
+### AMD or Intel settings
+
+You're on your own - I have an Nvidia card, and don't know what the appropriate settings are for other cards.
 
 
-## Test
+## Audio
 
-Run the following command:
+Get the names of the audio sources from:
 
-`./build/bin/ffmpeg -y -probesize 25M -framerate 60 -video_size 1920x1080 -thread_queue_size 1024 -f x11grab -i :0 -c:v h264_nvenc out.mkv`
+`pactl list sources | grep -i name:`
 
-to record a sample screen capture to ensure that the ffmpeg you just compiled works with the nvida nvenc encoder.
+
+## Recording
+
+See the `record.sh` file for what I use to record screen captures.  Replace the values of the variables as you see fit.
 
 
 ## Troubleshooting
 
 1. Have you tried restarting your computer?
-1. Does `./build/bin/ffmpeg -codecs | grep -i cuvid` show any codec entries?  If not, try deleting your whole build folder and starting over.
-1. `./build/bin/ffmpeg -h encoder=h264_nvenc` shows arguments that are compatible with the `nvenc` encoder.  Are you using them correctly?
+1. Can you record anything in OBS?
+1. Can you record from all sources you care about in OBS?
+1. Can you see your audio working in pavucontrol?
+
+### Am I using X or Wayland?
+
+Run `loginctl` to get your session ID - for me, it was `c2`
+
+Run `loginctl show-session c2 -p Type`.  If you are using X, you'll see `x11`
+
+If you're using Wayland, you're on your own.
 
 
-## Resources
+# Resources
 
-* [https://www.gamingonlinux.com/articles/how-to-an-update-on-fixing-screen-tearing-on-linux-with-an-nvidia-gpu.8892](https://www.gamingonlinux.com/articles/how-to-an-update-on-fixing-screen-tearing-on-linux-with-an-nvidia-gpu.8892)
-    * nvidia settings for reducing / eliminating screen tearing
 * [https://www.youtube.com/watch?v=W0rR6URTh24](https://www.youtube.com/watch?v=W0rR6URTh24)
     * an old video of mine for getting ffmpeg with nvenc to work in older versions of mint/ubuntu
 * [https://www.youtube.com/watch?v=yDkOgjqN0NE](https://www.youtube.com/watch?v=yDkOgjqN0NE)
     * an old video of mine for getting ffmpeg to capture audio streams
+* [https://unix.stackexchange.com/a/325972](https://unix.stackexchange.com/a/325972)
+    * Determining X11 or Wayland
+* [https://ubuntuforums.org/showthread.php?t=2392117](https://ubuntuforums.org/showthread.php?t=2392117)
+    * Saving the nvidia settings to an xorg.conf file in Ubuntu 18.04
+* [https://devtalk.nvidia.com/default/topic/823711/linux/tearing-add-frame-buffer-please/](https://devtalk.nvidia.com/default/topic/823711/linux/tearing-add-frame-buffer-please/)
+    * Triple Buffer, which prevents screen tearing
+* [https://www.linuxquestions.org/questions/linux-software-2/triple-buffer-on-nvidia-610335/](https://www.linuxquestions.org/questions/linux-software-2/triple-buffer-on-nvidia-610335/)
+    * More Triple Buffer stuff
+* [https://trac.ffmpeg.org/ticket/6375](https://trac.ffmpeg.org/ticket/6375)
+    * Needed `max_muxing_queue_size` argument to make conversion script work
 
-
-## FFMPEG Compile Resources
-
-* [https://trac.ffmpeg.org/wiki/CompilationGuide/Ubuntu](https://trac.ffmpeg.org/wiki/CompilationGuide/Ubuntu)
-    * Official FFMPEG documentation for compiling on Mint and Ubuntu
-* [https://trac.ffmpeg.org/wiki/HWAccelIntro#NVENC](https://trac.ffmpeg.org/wiki/HWAccelIntro#NVENC)
-    * Official FFMPEG documentation for using NVENC with FFMPEG
-* [https://developer.nvidia.com/ffmpeg](https://developer.nvidia.com/ffmpeg)
-    * Official Nvidia page with some overview information
-    * Contains some of the compile flags I used
-* [https://developer.nvidia.com/cuda-downloads](https://developer.nvidia.com/cuda-downloads)
-    * Download page for the cuda toolkit, which is needed for the video codec sdk
-* [https://developer.nvidia.com/nvidia-video-codec-sdk](https://developer.nvidia.com/nvidia-video-codec-sdk)
-    * Download page for the Video Codec SDK, which is needed to use hardware acceleration from FFMPEG
-* [https://github.com/FFmpeg/nv-codec-headers](https://github.com/FFmpeg/nv-codec-headers)
-    * Official repo for nv-codec-headers, which are needed for FFMPEG to use the nvidia and cuda stuff during compilation
-* [https://devtalk.nvidia.com/default/topic/457664/nvcc-quot-no-command-39-nvcc-39-found-quot-/](https://devtalk.nvidia.com/default/topic/457664/nvcc-quot-no-command-39-nvcc-39-found-quot-/)
-    * Helped me troubleshoot by informing me that cuda executables are not on the $PATH by default, and that I need to add them to the $PATH when compiling FFMPEG
-* [https://github.com/tensorflow/tensorflow/issues/7653](https://github.com/tensorflow/tensorflow/issues/7653)
-    * Helped me troubleshoot using `nvidia-smi`
-* [https://stackoverflow.com/questions/43022843/nvidia-nvml-driver-library-version-mismatch](https://stackoverflow.com/questions/43022843/nvidia-nvml-driver-library-version-mismatch)
-    * Helped me troubleshoot by informing me that after I install cuda, I may need to restart my computer
 
 # @TODO
 
-1. make nvidia settings persist after a restart!
+* conversion script
+* use in-game gamma settings
+* face in corner
+* heart rate monitor

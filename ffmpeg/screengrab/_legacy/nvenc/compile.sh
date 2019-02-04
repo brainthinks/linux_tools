@@ -16,6 +16,7 @@ sudo apt update
 
 sudo apt -y install \
   git \
+  pavucontrol \
   autoconf \
   automake \
   build-essential \
@@ -53,10 +54,6 @@ wget -O ffmpeg-snapshot.tar.bz2 https://ffmpeg.org/releases/ffmpeg-snapshot.tar.
 tar xjvf ffmpeg-snapshot.tar.bz2
 cd ffmpeg
 
-  # --extra-cflags="-I$DESTINATION/ffmpeg_build/include" \
-  # --extra-ldflags="-L$DESTINATION/ffmpeg_build/lib" \
-  # --extra-cflags="-I/usr/local/cuda/include"
-  # --extra-ldflags="-L/usr/local/cuda/lib64"
 PKG_CONFIG_PATH="$DESTINATION/ffmpeg_build/lib/pkgconfig" ./configure \
   --prefix="$DESTINATION/ffmpeg_build" \
   --pkg-config-flags="--static" \
@@ -74,6 +71,7 @@ PKG_CONFIG_PATH="$DESTINATION/ffmpeg_build/lib/pkgconfig" ./configure \
   --enable-libx264 \
   --enable-libx265 \
   --enable-nonfree \
+  --enable-libpulse \
   --enable-cuda-sdk \
   --enable-cuda \
   --enable-cuvid \
