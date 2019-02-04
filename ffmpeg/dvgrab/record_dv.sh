@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-source "../utils.sh"
+source "../../utils.sh"
 
 # @see - https://help.ubuntu.com/community/FireWire/dvgrab
 # @see - http://renomath.org/video/linux/hi8/
