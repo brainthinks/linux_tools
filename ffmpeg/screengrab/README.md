@@ -11,6 +11,19 @@ With these instructions and scripts, I can record my screen without tearing or c
 I hope you find this useful in some way.
 
 
+## Goals
+
+1. no screen tearing
+1. no stuttering / dropped frames
+1. no impact on performance of demonstration (e.g. Doom shouldn't run slow while I'm recording)
+1. 1920x1080 resolution
+1. 60 fps
+1. computer audio track
+1. voice-over audio track
+1. converted files are high-quality (ffmpeg cfr 17)
+1. converted files are of reasonable file size (~1.5gb per ten minutes)
+
+
 ## Configurations
 
 ### System

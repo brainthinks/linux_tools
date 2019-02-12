@@ -51,7 +51,7 @@ ffmpeg \
   -c:v libx264 \
   -b:v "${VIDEO_BITRATE}k" \
   -preset ultrafast \
-  -crf 0 \
+  -crf 17 \
   "$DESTINATION/$FILE_NAME"
 
 echo ""
