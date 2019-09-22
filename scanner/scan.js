@@ -72,18 +72,16 @@ function run (command, ...args) {
         return reject(`Process exited with code ${code}.  Review the output above.`);
       }
 
-      if (command !== 'scanimage') {
-        return resolve();
-      }
-
-      console.log('Waiting for scanner to become ready...');
-
-      setTimeout(() => {
-        resolve();
-      }, SCANNER_READY_DELAY);
-
-      return;
+      return resolve();
     });
+  });
+}
+
+function sleep (delay = 1000) {
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      resolve();
+    }, delay);
   });
 }
 
@@ -96,6 +94,10 @@ async function qualityTest () {
       const filename = `${TEST_SCAN_DIR}/scan_${formatType}_${compressionType}`;
 
       await run('./scan.sh', filename, formatType, compressionType);
+
+      console.log('Waiting for scanner to become ready...');
+
+      await sleep(SCANNER_READY_DELAY);
     }
   }
 }
@@ -174,6 +176,10 @@ async function main () {
     const filename = constructFilename(targetDirectory, scanBatch, scanCount);
 
     await run('./scan.sh', filename);
+
+    console.log('Waiting for scanner to become ready...');
+
+    await sleep(SCANNER_READY_DELAY);
 
     scanCount++;
   }
