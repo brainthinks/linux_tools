@@ -6,6 +6,7 @@
 const { spawn } = require('child_process');
 
 const SCANNER_READY_DELAY = 10 * 1000;
+const TEST_SCAN_DIR = './test_scans';
 
 const formatTypes = [
   'pnm',
@@ -41,8 +42,8 @@ function run (command, ...args) {
       console.log(`child process exited with code ${code}`);
 
       if (code === 0) {
+        console.log('Waiting for scanner to become ready...');
         setTimeout(() => {
-          console.log('Waiting for scanner to become ready...');
           resolve();
         }, SCANNER_READY_DELAY);
 
@@ -86,9 +87,9 @@ async function main () {
 
     for (let j = 0; j < compressionTypes.length; j++) {
       const compressionType = compressionTypes[j];
-      const filename = `scan_${formatType}_${compressionType}`;
+      const filename = `${TEST_SCAN_DIR}/scan_${formatType}_${compressionType}`;
 
-      await run('./scan.sh', formatType, compressionType);
+      await run('./scan.sh', filename, formatType, compressionType);
     }
   }
 }
