@@ -68,16 +68,21 @@ function run (command, ...args) {
 
       console.log(`child process exited with code ${code}`);
 
-      if (code === 0) {
-        console.log('Waiting for scanner to become ready...');
-        setTimeout(() => {
-          resolve();
-        }, SCANNER_READY_DELAY);
-
-        return;
+      if (code !== 0) {
+        return reject(`Process exited with code ${code}.  Review the output above.`);
       }
 
-      reject(`Process exited with code ${code}.  Review the output above.`);
+      if (command !== 'scanimage') {
+        return resolve();
+      }
+
+      console.log('Waiting for scanner to become ready...');
+
+      setTimeout(() => {
+        resolve();
+      }, SCANNER_READY_DELAY);
+
+      return;
     });
   });
 }

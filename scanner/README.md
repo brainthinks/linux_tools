@@ -5,8 +5,13 @@ Use the files in this directory to scan over the network using my HP all in one.
 ## Notes
 
 `sudo apt install xsane* hplip*`
-`hp-setup`
-`hp-plugin`
+Add the printer via the Printers applet
+Open the HP toolbox
+select the printer
+select scan
+proceed with the scan
+follow the prompts to install the plugin (it takes a while to download)
+
 
 ## References
 
