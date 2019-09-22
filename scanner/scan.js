@@ -113,6 +113,8 @@ function constructFilename (targetDirectory, batchNumber, scanNumber) {
 async function main () {
   const targetDirectory = process.argv[2] || TEST_SCAN_DIR;
 
+  await run('mkdir', '-p', targetDirectory);
+
   let scanBatch = 0;
   let scanCount = 0;
 
