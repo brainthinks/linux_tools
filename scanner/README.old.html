@@ -1,0 +1,34 @@
+<html>
+<head>
+<title>Scanning over the network</title>
+</head>
+<body>
+<h1>Using a scanner that is directly connected to the network</h1>
+<p>Back in the day, scanners and printers would only hook up to a computer.  If you wanted to use a printer or scanner with more than one computer, you had to make sure that that function was supported, and then it had to be hooked up to a computer to host it to the other computers.  Now, these devices (printers and scanners) come with a built in ethernet jack or wifi.  This allows the printer/scanner to host itself, meaning you don't have to hook it up to a computer to make it accessible - it is connected directly to your network and it functions just like any other device on that network.</p>
+<p>I have an HP Color LaserJet 2840, which is an all-in-one.  Printing over the network is easy - I just tell my computer the IP address of the printer (or my OS will find it by doing a scan) and I'm good to go.  I can print from any computer in the house.</p>
+<p>So I figured, if printing is so easy, then scanning must be, too.  Well after a few hours of research, it seems that this is not the case.  I have a Windows PC and a Mac Pro Tower, and I'll cut the suspense - to this day, I have not found a way to scan with a network-connected scanner.  The only way I have been able to do it on either machine is to hook it directly to the computer; in this case, via USB.  I did some googling and wasn't finding too  much on the subject.  Most posts that google returned were not about my specific situation, and as I recall, there weren't many that I found.  Most of the suggestions were to try this 3rd party program or that one, including picasa, but try as I may, I was not able to get any program to recognize a networked device as a scanner.</p>
+<p>The point of this post is to inform you how to acheive scanning using a network-connected scanner.  Here is how I was able to do it.</p>
+<p>First, to cut to the chase, I was only able to get this to work using Linux.  As you step through here, the reasons why it works on Linux and not other OSs should become apparent.  Second, you'll need an HP printer/scanner.  It is possible that other manufacturers' scanners will work, but these steps are specific to HPs.  You can read them so you have an idea of the concepts involved, but I don't think it will be much help.</p>
+<p>I assume at this point that you have Linux installed (it can even be on a virtual machine) and your HP printer/scanner hooked up to the network.  As an example of this, I have an ethernet cord going from my router directly to my printer.</p>
+<h2>Software Installation</h2>
+<p>If you're using Ubuntu as I am, you should already have the necessary drivers for HP printers and scanners installed.  The HP website will be able to tell you if the drivers come preinstalled by default, and I recommend you visit the site anyway.  <a href="http://hplipopensource.com">HP Linux Imaging and Printing</a>.  To see for yourself if you have this installed already, an unorthodox way of doing it that I am aware of is to type "hp" into a terminal and press tab twice - this will list all available commands that start with "hp".  If yours looks similar to mine, you should be set.  If not, visit the page above, download, and install the HPLIP drivers.</p>
+<!-- Insert image of my terminal here -->
+<p>Next, you will need to get the IP address of your printer.  On my printer, I can print a network configuration report which tells me the IP address.  Alternatively, if you have already set up your printer, you can look at the properties of the printer to get the IP address.  For instance, the IP address of mine is 192.168.1.100.  Yours will almost certainly be different.  If you can't figure out how to get the IP address, google it.</p>
+<p>Now that you have the IP address of the scanner, you will need to use an HP utility called "hp-makeuri".  The utility will generate a handle (name) that you can use to communicate with the scanner.  In a terminal, type "hp-makeuri [insert-IP-address]" and hit enter.  For me, it would read "hp-makeuri 192.168.1.100".</p>
+
+<!-- insert image of terminal here -->
+
+<p>Copy the result somewhere as you'll need it later.  The URI that we are interested in is the SANE URI.  Sane is the name of the program we will be installing shortly.  As you can see from the screenshot, my SANE URI is "hpaio:/net/HP_Color_LaserJet_2840?ip=192.168.1.100".  Pretty long, but it is going to get the job done.</p>
+<p>We are close to being ready to scan.  At this point, the two devices are in communication, so the next step is to install the linux scanning software that will allow you to actually perform the scan.  For this, the installation will differ based on the distribution of linux you are using.  If you're using Ubuntu like me (or any Debian-based distro) you'll use apt-get:
+<ul><li>sudo apt-get install libsane</li>
+<li>sudo apt-get install xsane</li></ul>
+For the solution I got working, those are the 2 packages you'll need: xsane, libsane.  If you are using another distro, look up those packages in your package manager.</p>
+<p>Now that you have those installed, the next step is actually scanning the image!  Put the following command in your terminal: xsane [insert-URI].  For instance, the command on my machine was hpaio:/net/HP_Color_LaserJet_2840?ip=192.168.1.100</p>
+<p>You will likely see a splash icon to let you know that xsane is scanning for devices, and then 3 windows will open.  This is your scanning program, and because you passed it the URI, it knows that it will need to scan using your network-connected scanner!  You can modify any settings you wish and then press the scan button!  For example, the only setting I changed was the format that the scan will save in - I used png and then told it to save on my desktop:</p>
+
+<!-- insert image of xsane here -->
+
+<p>That's it!  You can now scan images (and possibly text) using a network connected scanner.</p>
+
+</body>
+</html>

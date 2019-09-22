@@ -11,11 +11,14 @@
 ###
 
 function toMkv () {
+  local SOURCE="$1"
+  local TARGET="$2"
+
   ffmpeg -y \
-    -i "$SOURCE/$1" \
+    -i "$SOURCE" \
     -an \
     -c:v copy \
-    "$TARGET/$2.mkv"
+    "$TARGET"
 }
 
 # The DVD video streams (VOB files) cannot (easily, at least)
@@ -65,6 +68,17 @@ function toFlac () {
     -i "$SOURCE" \
     -ss "$START_TIME" \
     -t "$RUN_TIME" \
+    -vn \
+    -c:a flac \
+    "$TARGET"
+}
+
+function toFlacAsIs () {
+  local SOURCE="$1"
+  local TARGET="$2"
+
+  ffmpeg -y \
+    -i "$SOURCE" \
     -vn \
     -c:a flac \
     "$TARGET"
