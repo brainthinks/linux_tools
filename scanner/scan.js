@@ -1,24 +1,39 @@
 #!/usr/bin/env node
 'use strict';
 
-// const util = require('util');
-// const exec = util.promisify(require('child_process').exec);
+const path = require('path');
 const { spawn } = require('child_process');
+const glob = require('glob');
+const throttle = require('lodash/throttle');
 
 const SCANNER_READY_DELAY = 10 * 1000;
+const PROGRESS_LOG_DELAY = 2 * 1000;
 const TEST_SCAN_DIR = './test_scans';
 
 const formatTypes = [
-  'pnm',
+  'png',
+  // 'pnm',
   // 'tiff',
-  // 'png',
   // 'jpeg',
 ];
 
 const compressionTypes = [
   'None',
-  'JPEG',
+  // 'JPEG',
 ];
+
+const resolutions = [
+  1200,
+  // 600,
+];
+
+// Only show the `scanimage` progress once every five seconds
+const throttledProcessConsoleLog = throttle((data) => {
+  console.log(data.toString());
+}, PROGRESS_LOG_DELAY, { leading: true });
+const throttledProcessConsoleError = throttle((data) => {
+  console.error(data.toString());
+}, PROGRESS_LOG_DELAY, { leading: true });
 
 function run (command, ...args) {
   return new Promise((resolve, reject) => {
@@ -28,11 +43,23 @@ function run (command, ...args) {
     const childProcess = spawn(command, args);
 
     childProcess.stdout.on('data', (data) => {
-      console.log(`stdout: ${data}`);
+      // @todo - Why includes?  What does it start with?
+      if (!data.toString().includes('Progress: ')) {
+        console.log(`stdout: ${data}`);
+        return;
+      }
+
+      throttledProcessConsoleLog(data);
     });
 
     childProcess.stderr.on('data', (data) => {
-      console.error(`stderr: ${data}`);
+      // @todo - Why includes?  What does it start with?
+      if (!data.toString().includes('Progress: ')) {
+        console.error(`stderr: ${data}`);
+        return;
+      }
+
+      throttledProcessConsoleError(data);
     });
 
     childProcess.on('close', (code) => {
@@ -55,33 +82,7 @@ function run (command, ...args) {
   });
 }
 
-// function _run (command) {
-//   return new Promise(async (resolve, reject) => {
-//     try {
-//       console.log('About to run command:');
-//       console.log(command);
-//       const { stdout, stderr } = await exec(command);
-
-//       console.log('stdout:', stdout);
-//       console.error('stderr:', stderr);
-
-//       console.log('Finished running command:');
-//       console.log(command);
-
-//       setTimeout(() => {
-//         console.log('Waiting for scanner to become ready...');
-//         resolve();
-//       }, 10000);
-//     }
-//     catch (error) {
-//       reject(error);
-//     }
-//   });
-// }
-
-async function main () {
-  // console.log('Ready to scan next document - Press ENTER...');
-
+async function qualityTest () {
   for (let i = 0; i < formatTypes.length; i++) {
     const formatType = formatTypes[i];
 
@@ -91,6 +92,83 @@ async function main () {
 
       await run('./scan.sh', filename, formatType, compressionType);
     }
+  }
+}
+
+function constructFilename (targetDirectory, batchNumber, scanNumber) {
+  const prefix = 'scan';
+  const extension = 'png';
+
+  if (typeof batchNumber === 'number') {
+    batchNumber = batchNumber.toString().padStart(4, '0');
+  }
+
+  if (typeof scanNumber === 'number') {
+    scanNumber = scanNumber.toString().padStart(7, '0');
+  }
+
+  return path.join(targetDirectory, `${prefix}_${batchNumber}_${scanNumber}.${extension}`);
+}
+
+async function main () {
+  const targetDirectory = process.argv[2] || TEST_SCAN_DIR;
+
+  let scanBatch = 0;
+  let scanCount = 0;
+
+  let isCurrentBatchNumber = false;
+
+  while (!isCurrentBatchNumber) {
+    isCurrentBatchNumber = await new Promise((resolve, reject) => {
+      const filePattern = constructFilename(targetDirectory, scanBatch, '*');
+      console.log(`Checking for existence of ${filePattern}`);
+      glob(filePattern, (error, files) => {
+        if (error) {
+          return reject(error)
+        }
+
+        // Will return true if files exist in the target directory that match the
+        // glob, which means the batch number has already been used
+        resolve(files.length === 0);
+      });
+    });
+
+    if (!isCurrentBatchNumber) {
+      scanBatch++;
+    }
+  }
+
+  while (true) {
+    console.log('');
+    console.log('');
+    console.log(`Next up: folder ${targetDirectory}, batch #${scanBatch}, scan #${scanCount}`);
+    console.log('Ready to scan next document - load the scanner bed then press any key to continue...');
+    console.log('');
+
+    // Wait for the human to press a key
+    // @see - https://stackoverflow.com/questions/19687407/press-any-key-to-continue-in-nodejs
+    await new Promise((resolve, reject) => {
+      process.stdin.setRawMode(true);
+
+      process.stdin.once('data', function (data) {
+        const byteArray = [...data];
+
+        if (byteArray.length > 0 && byteArray[0] === 3) {
+          console.log('^C');
+          process.exit(1);
+        }
+
+        process.stdin.setRawMode(false);
+
+        resolve();
+      });
+    });
+
+    const filename = constructFilename(targetDirectory, scanBatch, scanCount);
+
+    await run('./scan.sh', filename);
+
+    scanCount++;
   }
 }
 
