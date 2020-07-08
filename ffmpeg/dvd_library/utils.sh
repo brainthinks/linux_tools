@@ -84,6 +84,80 @@ function toFlacAsIs () {
     "$TARGET"
 }
 
+# @see:
+# * https://superuser.com/questions/579008/add-1-second-of-silence-to-audio-through-ffmpeg
+# * https://trac.ffmpeg.org/wiki/Concatenate
+# * https://video.stackexchange.com/questions/16356/how-to-use-ffprobe-to-obtain-certain-information-about-mp4-h-264-files
+# * https://trac.ffmpeg.org/wiki/FFprobeTips
+function padFlacEnd () {
+  local TARGET_RUN_TIME_FILE="$1"
+  local SOURCE="$2"
+  local TARGET="$3"
+
+  if [ -z "${SOURCE}" ]; then
+    echo "ERROR: source file is required"
+    return 1
+  fi
+
+  if [ -z "${TARGET}" ]; then
+    echo "ERROR: target file is required"
+    return 1
+  fi
+
+  if [ -z "${TARGET_RUN_TIME_FILE}" ]; then
+    echo "ERROR: file with target run time is required"
+    return 1
+  fi
+
+  local TEMP_DIR="/tmp/dvd_library"
+
+  mkdir -p "$TEMP_DIR"
+
+  local TARGET_RUN_TIME="$(ffprobe -v error -select_streams a:0 -show_entries stream=duration -of default=noprint_wrappers=1:nokey=1 "${TARGET_RUN_TIME_FILE}")"
+  local SOURCE_RUN_TIME="$(ffprobe -v error -select_streams a:0 -show_entries stream=duration -of default=noprint_wrappers=1:nokey=1 "${SOURCE}")"
+  local SOURCE_SAMPLE_RATE="$(ffprobe -v error -select_streams a:0 -show_entries stream=sample_rate -of default=noprint_wrappers=1:nokey=1 "${SOURCE}")"
+  local SOURCE_SAMPLE_FMT="$(ffprobe -v error -select_streams a:0 -show_entries stream=sample_fmt -of default=noprint_wrappers=1:nokey=1 "${SOURCE}")"
+  local END_PAD_DURATION="$(echo "${TARGET_RUN_TIME} - ${SOURCE_RUN_TIME}" | bc)"
+
+  if [ "${END_PAD_DURATION}" -eq "0" ]; then
+    toFlacAsIs "${SOURCE}" "${TARGET}"
+    echo "The durations are the same!"
+    return 0
+  fi
+
+  # Generate the end pad flac file
+  ffmpeg -y \
+    -f lavfi \
+    -i anullsrc=r="${SOURCE_SAMPLE_RATE}" \
+    -t "${END_PAD_DURATION}" \
+    -sample_fmt "${SOURCE_SAMPLE_FMT}" \
+    "$TEMP_DIR/pad.flac"
+
+  # Generate the flac file from the source
+  toFlacAsIs "${SOURCE}" "$TEMP_DIR/temp1.flac"
+
+  rm -f "${TEMP_DIR}/mylist.txt"
+  touch "${TEMP_DIR}/mylist.txt"
+  echo "file '${TEMP_DIR}/temp1.flac'" >> "${TEMP_DIR}/mylist.txt"
+  echo "file '${TEMP_DIR}/pad.flac'" >> "${TEMP_DIR}/mylist.txt"
+
+  # Concatenate the source flac file with the pad flac
+  # NOTE - using the syntax `-i "concat:file1.flac|file2.flac"` resulted in errors
+  # NOTE - the re-encode here is necessary to get the timestamps correct...
+  ffmpeg -y \
+    -safe 0 \
+    -f concat \
+    -i "${TEMP_DIR}/mylist.txt" \
+    -c flac \
+    "${TARGET}"
+
+  echo "Target Run Time: ${TARGET_RUN_TIME}"
+  echo "Actual Run Time: $(ffprobe -v error -select_streams a:0 -show_entries stream=duration -of default=noprint_wrappers=1:nokey=1 ${TARGET})"
+
+  return 0
+}
+
+# DEPRECATED
 # @see - https://superuser.com/questions/579008/add-1-second-of-silence-to-audio-through-ffmpeg
 # @see - https://trac.ffmpeg.org/wiki/Concatenate
 function padFlac () {

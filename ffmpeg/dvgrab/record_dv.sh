@@ -2,26 +2,32 @@
 
 source "../../utils.sh"
 
+if [[ "$UID" -ne 0 ]]; then
+  dpe "You must run as root or with sudo."
+  exit 1
+fi
+
+DESTINATION="/media/user/dv_grab"
+
 # @see - https://help.ubuntu.com/community/FireWire/dvgrab
 # @see - http://renomath.org/video/linux/hi8/
 
 VIDEO_USER="user"
-DESTINATION="/media/user/disk_images_2/intensity_capture/dvgrab/split"
 FILE_NAME="$(date +%F-%s)"
 
-SINGLE_SEGMENT=$FALSE
-SPLIT=$FALSE
+SINGLE_SEGMENT=$TRUE
+SPLIT=$TRUE
 NO_REWIND=$FALSE
 
 while :
 do
   case "$1" in
-    --single-segment)
-      SINGLE_SEGMENT=$TRUE
+    --no-single-segment)
+      SINGLE_SEGMENT=$FALSE
       shift
       ;;
-    --split)
-      SPLIT=$TRUE
+    --no-split)
+      SPLIT=$FALSE
       shift
       ;;
     --no-rewind)
@@ -42,17 +48,16 @@ do
   esac
 done
 
-FILE_NAME="${FILE_NAME}_$1"
-
-dps "About to record DV..."
-
-if [[ "$UID" -ne 0 ]]; then
-  dpe "You must run as root or with sudo."
+if [ $SINGLE_SEGMENT -ne $TRUE ] && [ $SPLIT -ne $TRUE ]; then
+  dpe "You must specify at least one recording method"
   exit 1
 fi
 
-# @todo - check for the existence of destination!!!!
+FILE_NAME="${FILE_NAME}_$1"
 
+dps "Getting ready to record DV..."
+
+# @todo - check for the existence of destination!!!!
 dps "Ensuring destination exists..."
 mkdir -p "$DESTINATION/$FILE_NAME"
 ec "Created or confirmed $DESTINATION/$FILE_NAME" "Failed to create destination dir"
@@ -83,7 +88,7 @@ if [[ $SPLIT = $TRUE ]]; then
   dps "Rewinding the tape, then recording split segments..."
   # Rewind the tape, then record the entire tape, allowing dvgrab
   # to split the video into files based on breaks in the timecode
-  
+
   if [[ $NO_REWIND = $TRUE ]]; then
     dvgrab \
       -format raw \

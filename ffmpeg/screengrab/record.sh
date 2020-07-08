@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 
 # output file configuration
-DESTINATION="/media/user/linux_storage/videos/obs_recordings"
+DESTINATION="/media/user/ffmpeg_capture"
 TIME_LABEL="$(date +%F_%T_%s)"
-FILE_NAME="${TIME_LABEL}.mkv"
+FILE_NAME="${TIME_LABEL}_${1:-""}.mkv"
 
 # video configuration
 FRAMERATE="60"
@@ -15,7 +15,7 @@ LOCAL_DISPLAY=":0" # @todo - use the $DISPLAY value as the default
 
 # for display 0
 # GRAB_AREA="${LOCAL_DISPLAY}+0,0"
-# for display 1
+# for display 1 (second monitor)
 GRAB_AREA="${LOCAL_DISPLAY}+${WIDTH},0"
 
 # audio sources
@@ -28,21 +28,22 @@ PROBESIZE="25M"
 THREAD_QUEUE_SIZE="1024"
 
 echo "Screengrabbing started at $(date +%T)"
+echo "Capturing to file ${DESTINATION}/${FILE_NAME}"
 echo ""
 echo "Press q to stop screengrabbing..."
 
 ffmpeg \
   -y \
   -loglevel error \
-  -probesize "$PROBESIZE" \
-  -framerate "$FRAMERATE" \
-  -video_size "$RESOLUTION" \
-  -thread_queue_size "$THREAD_QUEUE_SIZE" \
-  -f x11grab -i "$GRAB_AREA" \
-  -thread_queue_size "$THREAD_QUEUE_SIZE" \
-  -f pulse -i "$WHAT_U_HEAR" \
-  -thread_queue_size "$THREAD_QUEUE_SIZE" \
-  -f pulse -i "$MIC" \
+  -probesize "${PROBESIZE}" \
+  -framerate "${FRAMERATE}" \
+  -video_size "${RESOLUTION}" \
+  -thread_queue_size "${THREAD_QUEUE_SIZE}" \
+  -f x11grab -i "${GRAB_AREA}" \
+  -thread_queue_size "${THREAD_QUEUE_SIZE}" \
+  -f pulse -i "${WHAT_U_HEAR}" \
+  -thread_queue_size "${THREAD_QUEUE_SIZE}" \
+  -f pulse -i "${MIC}" \
   -filter_complex amix=inputs=2[mix] \
   -map 0:v \
   -map '[mix]' \
@@ -52,7 +53,7 @@ ffmpeg \
   -b:v "${VIDEO_BITRATE}k" \
   -preset ultrafast \
   -crf 17 \
-  "$DESTINATION/$FILE_NAME"
+  "${DESTINATION}/${FILE_NAME}"
 
 echo ""
-echo "Screengrabbing for $DESTINATION/$FILE_NAME stopped at $(date +%T)"
+echo "Screengrabbing for ${DESTINATION}/${FILE_NAME} stopped at $(date +%T)"

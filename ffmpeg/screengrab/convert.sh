@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 
 # output file configuration
-DESTINATION="/media/user/linux_storage/videos/obs_recordings"
+DESTINATION="/media/user/ffmpeg_capture"
 TIME_LABEL="$(date +%F_%T_%s)"
-FILE_NAME="${TIME_LABEL}.mkv"
+FILE_NAME="${1}.mkv"
 
 # I don't know what this does
 PROBESIZE="25M"
@@ -13,11 +13,12 @@ THREAD_QUEUE_SIZE="1024"
 echo "Conversion started at $(date +%T)"
 
 ffmpeg \
-  -y \
   -loglevel error \
-  -i "$1" \
-  -c:a copy \
-  -c:v libx264 \
+  -i "$2" \
+  -c:a flac \
+  -c:v h264_nvenc \
+  -profile high \
+  -pix_fmt yuv420p \
   -crf 17 \
   -max_muxing_queue_size 99999 \
   "$DESTINATION/$FILE_NAME"
