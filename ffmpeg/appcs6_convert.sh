@@ -29,10 +29,12 @@ set -e
 source_directory="${1:-$(pwd)}"
 # The directory in which to put the converted files
 target_directory="${2:-${source_directory}}"
-# The suffix to append to the name of the converted file
+# The suffix to append to the name of the generated files
 target_suffix="fixed"
-# This is the extension we will use for the resulting files
+# This is the extension we will use for the converted files
 target_extension="mp4"
+# This is the extension we will use for the exported audio files
+target_extension_audio="m4a"
 
 nl=$'\n'
 final_message=""
@@ -48,8 +50,26 @@ function appcs6_convert () {
     -i "${source}" \
     -c:v libx264 \
     -preset ultrafast \
+    -vf format=yuv420p \
     -crf 17 \
-    -c:a copy \
+    -c:a aac -b:a 160k \
+    "${target}"
+    # -c:a copy \
+}
+
+# Sometimes, APPCS6 won't allow you to decouple the video track from the audio
+# track.  For videos that have audio that is not in sync, having the audio as a
+# separate file helps.
+#
+# @see - https://trac.ffmpeg.org/wiki/Encode/HighQualityAudio -> aac
+# @see - https://trac.ffmpeg.org/wiki/Encode/AAC
+function export_audio () {
+  local source="$1"
+  local target="$2"
+
+  ffmpeg \
+    -i "${source}" \
+    -vn \
     "${target}"
 }
 
@@ -80,7 +100,10 @@ do
   fi
 
   path_to_converted_file="${target_directory}/${file_name}.${target_suffix}.${target_extension}"
+  path_to_converted_file_audio="${path_to_converted_file%.*}.${target_extension_audio}"
+
   appcs6_convert "${path_to_source_file}" "${path_to_converted_file}"
+  export_audio "${path_to_source_file}" "${path_to_converted_file_audio}"
 
   # @todo - this also needs to check the return code of the previous function
   # call.  The existence of the file isn't enough to determine success.
