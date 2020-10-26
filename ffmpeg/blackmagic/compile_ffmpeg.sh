@@ -1,10 +1,19 @@
 #!/usr/bin/env bash
 
-# I assume that you run this script from the directory in which it exists
+# @see - https://trac.ffmpeg.org/wiki/CompilationGuide/Ubuntu
+# @see - http://trac.ffmpeg.org/wiki/HWAccelIntro
+# @see - https://stackoverflow.com/questions/49825249/compiling-ffmpeg-with-an-output-device-decklink
+
+set -e
 
 ROOT_DIR="$(pwd)"
-BUILD_DIR="$ROOT_DIR/src/build"
-FFMPEG_TAG="n4.0.2"
+BUILD_DIR="${ROOT_DIR}/build"
+BLACKMAGIC_SDK_PATH="/usr/include/blackmagic_decklink_sdk"
+FFMPEG_SOURCE_URL="https://ffmpeg.org/releases/ffmpeg-snapshot.tar.bz2"
+
+BIN_DIR="${BUILD_DIR}/bin"
+FFMPEG_BUILD_DIR="${BUILD_DIR}/ffmpeg_build"
+FFMPEG_SOURCES_DIR="${BUILD_DIR}/ffmpeg_sources"
 
 function installDependencies () {
   sudo apt-get update
@@ -16,6 +25,7 @@ function installDependencies () {
     git \
     libass-dev \
     libfreetype6-dev \
+    libgnutls28-dev \
     libsdl2-dev \
     libtool \
     libva-dev \
@@ -27,8 +37,8 @@ function installDependencies () {
     pkg-config \
     texinfo \
     wget \
-    zlib1g-dev \
     yasm \
+    zlib1g-dev \
     libx264-dev \
     libx265-dev \
     libnuma-dev \
@@ -38,44 +48,67 @@ function installDependencies () {
     libopus-dev
 }
 
+function prepareFileSystem () {
+  rm -rf "${BUILD_DIR}"
+  mkdir -p "${BIN_DIR}"
+  mkdir -p "${FFMPEG_BUILD_DIR}"
+  mkdir -p "${FFMPEG_SOURCES_DIR}"
+}
+
+function getFfmpegSource () {
+  cd "${FFMPEG_SOURCES_DIR}"
+  wget -O ffmpeg-snapshot.tar.bz2 "${FFMPEG_SOURCE_URL}"
+  tar xjvf ffmpeg-snapshot.tar.bz2
+}
+
+function getNvencAssets () {
+  git clone https://git.videolan.org/git/ffmpeg/nv-codec-headers.git
+  cd nv-codec-headers
+  make
+  sudo make install
+}
+
 # @todo - check for the existence of `/usr/include/blackmagic_decklink_sdk`
 function compileFfmpeg () {
-  cd ~/ffmpeg_sources
-  wget -O ffmpeg-snapshot.tar.bz2 https://ffmpeg.org/releases/ffmpeg-snapshot.tar.bz2
-  tar xjvf ffmpeg-snapshot.tar.bz2
-  cd ffmpeg
-  PATH="$HOME/bin:$PATH" PKG_CONFIG_PATH="$HOME/ffmpeg_build/lib/pkgconfig" ./configure \
-    --prefix="$HOME/ffmpeg_build" \
-    --pkg-config-flags="--static" \
-    --extra-cflags="-I$HOME/ffmpeg_build/include -I/usr/include/blackmagic_decklink_sdk" \
-    --extra-ldflags="-L$HOME/ffmpeg_build/lib" \
-    --extra-libs="-lpthread -lm" \
-    --bindir="$HOME/bin" \
-    --enable-gpl \
-    --enable-libass \
-    --enable-libfdk-aac \
-    --enable-libfreetype \
-    --enable-libmp3lame \
-    --enable-libopus \
-    --enable-libvorbis \
-    --enable-libvpx \
-    --enable-libx264 \
-    --enable-libx265 \
-    --enable-nonfree \
-    --enable-decklink
+  cd "${FFMPEG_SOURCES_DIR}/ffmpeg"
 
-  PATH="$HOME/bin:$PATH" make -j20
+  PATH="${BIN_DIR}:${PATH}" \
+  PKG_CONFIG_PATH="${FFMPEG_BUILD_DIR}/lib/pkgconfig" \
+    ./configure \
+      --prefix="${FFMPEG_BUILD_DIR}" \
+      --pkg-config-flags="--static" \
+      --extra-cflags="-I${FFMPEG_BUILD_DIR}/include -I${BLACKMAGIC_SDK_PATH}" \
+      --extra-ldflags="-L${FFMPEG_BUILD_DIR}/lib" \
+      --extra-libs="-lpthread -lm" \
+      --bindir="${BIN_DIR}" \
+      --enable-gpl \
+      --enable-libass \
+      --enable-libfdk-aac \
+      --enable-libfreetype \
+      --enable-libmp3lame \
+      --enable-libopus \
+      --enable-libvorbis \
+      --enable-libvpx \
+      --enable-libx264 \
+      --enable-libx265 \
+      --enable-nonfree \
+      --enable-nvenc \
+      --enable-decklink
+
+  # the -j20 flag refers to the number of cores to use for compiling
+  PATH="${BIN_DIR}:${PATH}" \
+    make \
+      -j20
+
   make -j20 install
   hash -r
 }
 
-function installManDocs () {
-  echo "MANPATH_MAP $BUILD_DIR/bin $BUILD_DIR/ffmpeg_build/share/man" >> ~/.manpath
-}
-
 installDependencies
+prepareFileSystem
+getFfmpegSource
+getNvencAssets
 compileFfmpeg
-# installManDocs
 
 echo "Next steps:"
 echo "Ensure the NVIDIA proprietary driver is in use."
