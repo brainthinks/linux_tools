@@ -5,17 +5,16 @@ source "../utils.sh"
 # @see - https://help.ubuntu.com/community/FireWire/dvgrab
 # @see - http://renomath.org/video/linux/hi8/
 
-VIDEO_USER="user"
 DESTINATION="/media/user/linux_storage/backups/floppys"
 TIMESTAMP="$(date +%F-%s)"
-CUSTOM_LABEL="$1"
+CUSTOM_LABEL="${1:-no_label}"
 
 # On my installation of Linux Mint 19, with my particular floppy drive,
 # the name of the mounted disk is literally "disk"
-DRIVE_NAME="$2"
-DRIVE_PATH="/media/user/${DRIVE_NAME}"
+FLOPPY_PATH="${2:-/media/user/disk}"
+DRIVE_PATH="${FLOPPY_PATH}"
 
-FILE_NAME="${TIMESTAMP}_${CUSTOM_LABEL}"
+FLOPPY_BACKUP_DIR="${TIMESTAMP}_${CUSTOM_LABEL}"
 
 dps "About to backup a 3 1/2 floppy disk..."
 
@@ -27,15 +26,13 @@ dps "About to backup a 3 1/2 floppy disk..."
 # @todo - check for the existence of destination!!!!
 
 dps "Ensuring destination exists..."
-mkdir -p "$DESTINATION/$FILE_NAME"
-ec "Created or confirmed $DESTINATION/$FILE_NAME" "Failed to create destination dir"
+mkdir -p "${DESTINATION}/${FLOPPY_BACKUP_DIR}"
+ec "Created or confirmed ${DESTINATION}/${FLOPPY_BACKUP_DIR}" "Failed to create destination dir"
 
-# dps "Copying all files"
-# cp -R "$DRIVE_PATH/." "$DESTINATION/$FILE_NAME"
-# ec "Successfully copied all files." "Failed to copy all files!"
+dps "Running backup script..."
+./src/backup.py "${DRIVE_PATH}" "${DESTINATION}/${FLOPPY_BACKUP_DIR}"
+ec "Successfully copied at least some files" "Critical error while copying files!"
 
-./backup.py "$DRIVE_PATH" "$DESTINATION/$FILE_NAME"
-
-dpsuc "Finished backing up floppy! '$FILE_NAME'"
+dpsuc "Finished backing up floppy! '${FLOPPY_BACKUP_DIR}'"
 
 exit 0
