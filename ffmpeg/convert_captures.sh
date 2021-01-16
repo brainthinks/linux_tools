@@ -75,6 +75,8 @@ function convert_vhs_dump () {
 
   ffmpeg \
     -i "${source}" \
+      ${REM# @see - https://stackoverflow.com/a/56681096 #} \
+    -max_muxing_queue_size 9999 \
       ${REM# aac is a widely-supported audio format #} \
     -c:a aac \
       ${REM# based on some anecdotal testing, 192 is the best my ears can discerne #} \
