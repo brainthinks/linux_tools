@@ -93,7 +93,12 @@ async function qualityTest () {
       const compressionType = compressionTypes[j];
       const filename = `${TEST_SCAN_DIR}/scan_${formatType}_${compressionType}`;
 
-      await run('./scan.sh', filename, formatType, compressionType);
+      await run(
+        './scan.sh',
+        filename,
+        formatType,
+        compressionType
+      );
 
       console.log('Waiting for scanner to become ready...');
 
@@ -175,7 +180,13 @@ async function main () {
 
     const filename = constructFilename(targetDirectory, scanBatch, scanCount);
 
-    await run('./scan.sh', filename);
+    await run(
+      './scan.sh',
+      filename,
+      formatTypes[0],
+      compressionTypes[0],
+      resolutions[0],
+    );
 
     console.log('Waiting for scanner to become ready...');
 
