@@ -1,0 +1,10 @@
+version: "3.9"
+
+services:
+  rtsp-server:
+    image: aler9/rtsp-simple-server
+    # @todo - is there a better way than using the host network?  I tried
+    # bridge, but it doesn't work.
+    network_mode: host
+    # ports:
+    #   - ${RTSP_PORT}:${RTSP_PORT}/tcp
