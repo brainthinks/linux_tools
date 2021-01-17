@@ -1,5 +1,6 @@
 {
     "editor.tabSize": 2,
+    "editor.insertSpaces": true,
     "files.insertFinalNewline": true,
     "files.trimTrailingWhitespace": true,
     "typescript.npm": "/home/user/apps/n/bin/node",
@@ -11,10 +12,22 @@
     "editor.multiCursorModifier": "ctrlCmd",
     "editor.snippetSuggestions": "top",
     "workbench.colorTheme": "Horizon",
+    "workbench.iconTheme": "material-icon-theme",
     "workbench.editor.closeEmptyGroups": false,
     "editor.renderWhitespace": "all",
     "editor.renderControlCharacters": false,
     "javascript.updateImportsOnFileMove.enabled": "never",
     "explorer.confirmDragAndDrop": false,
-    "files.maxMemoryForLargeFilesMB": 8192
+    "files.maxMemoryForLargeFilesMB": 8192,
+    "editor.rulers": [
+        80,
+        120
+    ],
+    "markdown.extension.orderedList.marker": "one",
+    "markdown.extension.list.indentationSize": "inherit",
+    "[markdown]": {
+        "editor.wordWrap": "on",
+        "editor.quickSuggestions": false,
+        "editor.tabSize": 4
+    }
 }

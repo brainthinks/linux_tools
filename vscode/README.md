@@ -2,12 +2,20 @@
 
 ## Extensions
 
-* `Horizon Theme`
-* `Sublime Text Keymap and Settings Importer`
-* `ESLint`
-* `Document This`
-* `change-case`
+First, `Sublime Text Keymap and Settings Importer`
+
 * `Beautify`
+* `Docker`
+* `DotENV`
+* `EditorConfig for VS Code`
+* `ESLint`
+* `GitLens`
+* `Horizon Theme`
+* `Language Support for Java(TM) by Red Hat`
+* `Markdown All in One`
+* `Material Icon Theme`
+* `Python`
+* `YAML`
 
 ## Settings
 
