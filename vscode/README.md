@@ -22,3 +22,11 @@ First, `Sublime Text Keymap and Settings Importer`
 Copy the `settings.json` into your own `settings.json`
 
 File -> Preferences -> Settings - then click on the `{}` symbol at the top right.
+
+## VSCodium
+
+`code` and `codium` are installed in `/usr/share/`
+
+the file `resources/app/product.json` contains the `extensionsGallery` urls
+
+copy them from code into codium

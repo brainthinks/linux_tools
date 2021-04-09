@@ -7,7 +7,7 @@ FILENAME="${1:-scan}"
 FORMAT="${2:-"png"}"
 COMPRESSION="${3:-"None"}"
 RESOLUTION="${4:-75}"
-DEVICE="${5:-"hpaio:/net/HP_Color_LaserJet_MFP_M476dw?ip=192.168.1.99"}"
+DEVICE="${5:-"hpaio:/net/HP_Color_LaserJet_MFP_M476dw?ip=192.168.2.99"}"
 
 START_TIME="$(date +%s)"
 

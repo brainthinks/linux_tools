@@ -28,3 +28,19 @@ Extra special thanks to [https://archive.org/](https://archive.org/) - without t
 * ftape downloads (archive.org) - [https://web.archive.org/web/20000830072717/http://zeus.instmath.rwth-aachen.de/~heine/ftape/getting.html](https://web.archive.org/web/20000830072717/http://zeus.instmath.rwth-aachen.de/~heine/ftape/getting.html)
 * ftape debian source - [https://sources.debian.org/src/ftape/](https://sources.debian.org/src/ftape/)
 * ftape debian source data - [https://sources.debian.org/data/main/f/ftape/4.04a.x.2002.03.21-0.10/](https://sources.debian.org/data/main/f/ftape/4.04a.x.2002.03.21-0.10/)
+
+
+https://web.archive.org/web/20040302003055/http://zeus.instmath.rwth-aachen.de/~heine/ftape/archives/ftape-4.x/ftape-manual/html/Top.html
+
+https://web.archive.org/web/20020606195420/http://zeus.instmath.rwth-aachen.de/~heine/ftape/documentation.html
+
+https://www.cyberciti.biz/hardware/unix-linux-basic-tape-management-commands/
+
+https://www.cyberciti.biz/faq/linux-tape-backup-with-mt-and-tar-command-howto/
+
+http://cyberelk.net/tim/parport/paride.html
+
+https://en.wikipedia.org/wiki/Ditto_(drive)
+
+https://archive.org/download/debian_3.1r8_source
+

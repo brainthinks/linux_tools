@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-DESTINATION="/media/user/intensity_capture"
-FILE_NAME="$(date +%F-%s)_$1.mkv"
+DESTINATION="/media/user/2020_video_archi/intensity_capture"
+FILE_NAME="$(date +%F-%s)_${1}.mkv"
 
 FFMPEG_BIN="./build/bin/ffmpeg"
 

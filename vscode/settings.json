@@ -29,5 +29,14 @@
         "editor.wordWrap": "on",
         "editor.quickSuggestions": false,
         "editor.tabSize": 4
-    }
+    },
+    "[python]": {
+        "editor.tabSize": 4,
+        "editor.rulers": [
+            72,
+            79
+        ]
+    },
+    "gitlens.codeLens.recentChange.enabled": false,
+    "gitlens.codeLens.authors.enabled": false
 }
