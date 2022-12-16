@@ -3,7 +3,7 @@
     "editor.insertSpaces": true,
     "files.insertFinalNewline": true,
     "files.trimTrailingWhitespace": true,
-    "typescript.npm": "/home/user/apps/n/bin/node",
+    "typescript.npm": "/home/user/n/bin/node",
     "editor.parameterHints.enabled": false,
     "window.zoomLevel": 0,
     "editor.fontSize": 14,
@@ -11,7 +11,6 @@
     "editor.formatOnPaste": true,
     "editor.multiCursorModifier": "ctrlCmd",
     "editor.snippetSuggestions": "top",
-    "workbench.colorTheme": "Horizon",
     "workbench.iconTheme": "material-icon-theme",
     "workbench.editor.closeEmptyGroups": false,
     "editor.renderWhitespace": "all",
@@ -21,13 +20,18 @@
     "files.maxMemoryForLargeFilesMB": 8192,
     "editor.rulers": [
         80,
-        120
+        120,
+        160
     ],
     "markdown.extension.orderedList.marker": "one",
     "markdown.extension.list.indentationSize": "inherit",
     "[markdown]": {
         "editor.wordWrap": "on",
-        "editor.quickSuggestions": false,
+        "editor.quickSuggestions": {
+            "comments": "off",
+            "strings": "off",
+            "other": "off"
+        },
         "editor.tabSize": 4
     },
     "[python]": {
@@ -38,5 +42,29 @@
         ]
     },
     "gitlens.codeLens.recentChange.enabled": false,
-    "gitlens.codeLens.authors.enabled": false
+    "gitlens.codeLens.authors.enabled": false,
+    "typescript.updateImportsOnFileMove.enabled": "never",
+    "markdown.extension.toc.omittedFromToc": {
+        "README.md": [
+            "# *",
+            "## Table of Contents"
+        ]
+    },
+    "javascript.suggest.autoImports": false,
+    "typescript.suggest.autoImports": false,
+    "eslint.alwaysShowStatus": true,
+    "eslint.debug": true,
+    "eslint.nodePath": "/home/brian/n/bin/node",
+    "eslint.packageManager": "yarn",
+    "redhat.telemetry.enabled": false,
+    "explorer.confirmDelete": false,
+    "terminal.integrated.enableMultiLinePasteWarning": false,
+    "compareFolders.diffViewTitle": "compared path",
+    "compareFolders.excludeFilter": [
+        "**/node_modules",
+        "**/.git",
+        "**/yarn.lock"
+    ],
+    "compareFolders.ignoreFileNameCase": false,
+    "workbench.colorTheme": "Palenight Theme"
 }
