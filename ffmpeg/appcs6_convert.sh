@@ -51,6 +51,7 @@ function appcs6_convert () {
     -c:v libx264 \
     -preset ultrafast \
     -vf format=yuv420p \
+    -max_muxing_queue_size 1024 \
     -crf 17 \
     -c:a aac -b:a 160k \
     "${target}"
